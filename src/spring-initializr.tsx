@@ -1,13 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  popToRoot,
-  open
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, popToRoot, open } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { writeFileSync } from "fs";
@@ -94,9 +85,7 @@ export default function Command() {
         console.log("Response status:", response.status);
 
         if (!response.ok) {
-          throw new Error(
-            `Failed to fetch Spring Initializr metadata: ${response.status} ${response.statusText}`
-          );
+          throw new Error(`Failed to fetch Spring Initializr metadata: ${response.status} ${response.statusText}`);
         }
 
         const data = (await response.json()) as InitializrMetadata;
@@ -246,7 +235,12 @@ export default function Command() {
       <Form.TextField id="artifactId" title="Artifact ID" placeholder="demo" defaultValue="demo" />
       <Form.TextField id="name" title="Name" placeholder="demo" defaultValue="demo" />
       <Form.TextField id="description" title="Description" placeholder="Demo project for Spring Boot" />
-      <Form.TextField id="packageName" title="Package Name" placeholder="com.example.demo" defaultValue="com.example.demo" />
+      <Form.TextField
+        id="packageName"
+        title="Package Name"
+        placeholder="com.example.demo"
+        defaultValue="com.example.demo"
+      />
 
       <Form.Separator />
 
@@ -268,7 +262,7 @@ export default function Command() {
         {metadata.dependencies.values.flatMap((group) =>
           group.values.map((dep) => (
             <Form.TagPicker.Item key={dep.id} value={dep.id} title={`${group.name}: ${dep.name}`} />
-          ))
+          )),
         )}
       </Form.TagPicker>
     </Form>
