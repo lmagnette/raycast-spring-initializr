@@ -1,4 +1,13 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  popToRoot,
+  open
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { writeFileSync } from "fs";
@@ -60,7 +69,14 @@ type Values = {
   dependencies: string[];
 };
 
+interface Preferences {
+  outputDirectory: string;
+  popToRootAfterGenerate: boolean;
+  openOutputDirectory: boolean;
+}
+
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
   const [metadata, setMetadata] = useState<InitializrMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -78,7 +94,9 @@ export default function Command() {
         console.log("Response status:", response.status);
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch Spring Initializr metadata: ${response.status} ${response.statusText}`);
+          throw new Error(
+            `Failed to fetch Spring Initializr metadata: ${response.status} ${response.statusText}`
+          );
         }
 
         const data = (await response.json()) as InitializrMetadata;
@@ -138,17 +156,28 @@ export default function Command() {
       // Convert the response to a buffer
       const buffer = await response.buffer();
 
-      // Save to Downloads folder (macOS)
-      const homeDir = process.env.HOME;
-      const downloadsPath = path.join(homeDir || "", "Downloads", `${values.artifactId}.zip`);
+      // Use the user-specified directory, fallback to HOME if "~" is used
+      const outputDir = preferences.outputDirectory.replace("~", process.env.HOME || "");
+      const outputPath = path.join(outputDir, `${values.artifactId}.zip`);
 
-      writeFileSync(downloadsPath, buffer);
+      writeFileSync(outputPath, buffer);
 
       await showToast({
         style: Toast.Style.Success,
         title: "Project Downloaded",
-        message: `Saved to Downloads folder as ${values.artifactId}.zip`,
+        message: `Saved to ${outputPath}`,
       });
+
+      // If user wants to open the directory after generation
+      if (preferences.openOutputDirectory) {
+        const directoryToOpen = path.dirname(outputPath);
+        await open(directoryToOpen);
+      }
+
+      // If user wants to pop to root after generation
+      if (preferences.popToRootAfterGenerate) {
+        await popToRoot();
+      }
     } catch (error) {
       console.error("Error generating project:", error);
       await showToast({
@@ -214,19 +243,10 @@ export default function Command() {
       <Form.Separator />
 
       <Form.TextField id="groupId" title="Group ID" placeholder="com.example" defaultValue="com.example" />
-
       <Form.TextField id="artifactId" title="Artifact ID" placeholder="demo" defaultValue="demo" />
-
       <Form.TextField id="name" title="Name" placeholder="demo" defaultValue="demo" />
-
       <Form.TextField id="description" title="Description" placeholder="Demo project for Spring Boot" />
-
-      <Form.TextField
-        id="packageName"
-        title="Package Name"
-        placeholder="com.example.demo"
-        defaultValue="com.example.demo"
-      />
+      <Form.TextField id="packageName" title="Package Name" placeholder="com.example.demo" defaultValue="com.example.demo" />
 
       <Form.Separator />
 
@@ -248,7 +268,7 @@ export default function Command() {
         {metadata.dependencies.values.flatMap((group) =>
           group.values.map((dep) => (
             <Form.TagPicker.Item key={dep.id} value={dep.id} title={`${group.name}: ${dep.name}`} />
-          )),
+          ))
         )}
       </Form.TagPicker>
     </Form>
