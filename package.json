@@ -25,7 +25,8 @@
       "type": "directory",
       "title": "Output Directory",
       "description": "The directory where the generated project will be saved",
-      "default": "~/Downloads"
+      "default": "~/Downloads",
+      "required": false
     },
     {
       "name": "popToRootAfterGenerate",
@@ -33,7 +34,8 @@
       "title": "Return to Root After Generation",
       "description": "Return to the Raycast root view after the project is generated",
       "label": "Pop to Root",
-      "default": true
+      "default": true,
+      "required": false
     },
     {
       "name": "openOutputDirectory",
@@ -41,7 +43,8 @@
       "title": "Open Output Directory After Generation",
       "description": "Open the output directory in Finder after generation",
       "label": "Open Directory",
-      "default": true
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
