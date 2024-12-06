@@ -15,7 +15,33 @@
       "title": "Spring Initializr",
       "subtitle": "Create a new Spring Boot Application",
       "description": "Create a new Spring Boot Application",
-      "mode": "view"
+      "mode": "view",
+      "filename": "index.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "outputDirectory",
+      "type": "directory",
+      "title": "Output Directory",
+      "description": "The directory where the generated project will be saved",
+      "default": "~/Downloads"
+    },
+    {
+      "name": "popToRootAfterGenerate",
+      "type": "checkbox",
+      "title": "Return to Root After Generation",
+      "description": "Return to the Raycast root view after the project is generated",
+      "label": "Pop to Root",
+      "default": true
+    },
+    {
+      "name": "openOutputDirectory",
+      "type": "checkbox",
+      "title": "Open Output Directory After Generation",
+      "description": "Open the output directory in Finder after generation",
+      "label": "Open Directory",
+      "default": true
     }
   ],
   "dependencies": {
