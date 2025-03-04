@@ -7,7 +7,8 @@ import {
   getPreferenceValues,
   popToRoot,
   open,
-  openCommandPreferences, Application
+  openCommandPreferences,
+  Application,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
@@ -128,7 +129,7 @@ export default function Command() {
     fetchMetadata();
   }, []);
 
-  async function unzipFile(path:string, directory:string) {
+  async function unzipFile(path: string, directory: string) {
     try {
       const zip = new AdmZip(path);
       zip.extractAllTo(directory, true);
@@ -205,11 +206,11 @@ export default function Command() {
         message: `Saved to ${outputPath}`,
       });
 
-      if(preferences.unzip) {
-        const directory= path.join(outputDir, values.artifactId);
+      if (preferences.unzip) {
+        const directory = path.join(outputDir, values.artifactId);
         await unzipFile(outputPath, directory);
-        if(preferences.openInIDE && preferences.ide){
-          await openInIDE(directory,preferences.ide).catch( async () => {
+        if (preferences.openInIDE && preferences.ide) {
+          await openInIDE(directory, preferences.ide).catch(async () => {
             await showToast({
               style: Toast.Style.Failure,
               title: "An error occurred",
@@ -224,8 +225,6 @@ export default function Command() {
         const directoryToOpen = path.dirname(outputPath);
         await open(directoryToOpen);
       }
-
-
 
       // If user wants to pop to root after generation
       if (preferences.popToRootAfterGenerate) {
