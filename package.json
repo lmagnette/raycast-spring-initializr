@@ -45,15 +45,42 @@
       "label": "Open Directory",
       "default": true,
       "required": false
+    },
+    {
+      "name": "unzip",
+      "description": "Do you want to automatically unzip the downloaded archive. If set to false the option to open in IDE will not work",
+      "title": "Unzip the downloaded archive",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Unzip automatically the archive"
+    },
+    {
+      "name": "openInIDE",
+      "description": "Do you want the extension to automatically open your project in your IDE. To use it you need to configure the IDE the extension needs to use",
+      "title": "Open in my IDE",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Open the project in my IDE"
+    },
+    {
+      "name": "ide",
+      "description": "The IDE you want to use to open your project",
+      "type": "appPicker",
+      "required": false,
+      "title": "Selected IDE"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.88.3",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "adm-zip": "^0.5.16"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
+    "@types/adm-zip": "^0.5.7",
     "@types/node-fetch": "^2.6.12",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",

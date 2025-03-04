@@ -1,8 +1,20 @@
-import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, popToRoot, open } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  popToRoot,
+  open,
+  openCommandPreferences, Application
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { writeFileSync } from "fs";
 import path from "path";
+import AdmZip from "adm-zip";
+import { exec } from "child_process";
 
 interface DependencyValue {
   id: string;
@@ -64,6 +76,9 @@ interface Preferences {
   outputDirectory: string;
   popToRootAfterGenerate: boolean;
   openOutputDirectory: boolean;
+  unzip: boolean;
+  openInIDE: boolean;
+  ide: Application;
 }
 
 export default function Command() {
@@ -113,6 +128,39 @@ export default function Command() {
     fetchMetadata();
   }, []);
 
+  async function unzipFile(path:string, directory:string) {
+    try {
+      const zip = new AdmZip(path);
+      zip.extractAllTo(directory, true);
+      console.log("Extraction complete");
+    } catch (error) {
+      console.error(`Error extracting zip (${path}):`, error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "An error occurred",
+        message: `An error occurred while trying to unzip the file ${path} into ${directory}`,
+      });
+    }
+  }
+
+  function openInIDE(directoryPath: string, ide: Application) {
+    console.log(`Opening project with ${ide.name} from directory ${directoryPath}`);
+    const command = `open -a "${ide.path}" "${directoryPath}"`;
+    return new Promise((resolve, reject) => {
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error opening ${ide.name}: ${error.message}`);
+          reject(error);
+          return;
+        }
+        if (stderr) {
+          console.error(`${ide.name} stderr: ${stderr}`);
+        }
+        resolve(stdout);
+      });
+    });
+  }
+
   async function handleSubmit(values: Values) {
     try {
       console.log("Submitting form with values:", values);
@@ -157,11 +205,27 @@ export default function Command() {
         message: `Saved to ${outputPath}`,
       });
 
+      if(preferences.unzip) {
+        const directory= path.join(outputDir, values.artifactId);
+        await unzipFile(outputPath, directory);
+        if(preferences.openInIDE && preferences.ide){
+          await openInIDE(directory,preferences.ide).catch( async () => {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "An error occurred",
+              message: `An error occurred while trying to open ${preferences.ide}`,
+            });
+          });
+        }
+      }
+
       // If user wants to open the directory after generation
       if (preferences.openOutputDirectory) {
         const directoryToOpen = path.dirname(outputPath);
         await open(directoryToOpen);
       }
+
+
 
       // If user wants to pop to root after generation
       if (preferences.popToRootAfterGenerate) {
@@ -206,6 +270,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Generate Project" onSubmit={handleSubmit} />
+          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
         </ActionPanel>
       }
     >
